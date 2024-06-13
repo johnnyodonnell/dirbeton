@@ -1,5 +1,6 @@
 import concurrent.futures
 import json
+import datetime
 import os
 import sys
 import urllib.request
@@ -21,10 +22,19 @@ state_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
 state = {}
 state_file_name = "results.json"
+state_file_name_10m = "results_10m.json"
+last_minute = -1
 
 def save_state():
-    with open (state_file_name, "w") as f:
+    with open(state_file_name, "w") as f:
         json.dump(state, f)
+
+    # Every 10 minutes, save to similarly named file
+    now = datetime.datetime.now()
+    if ((now.minute % 10) == 0) and (now.minute != last_minute):
+        last_minute = now.minute
+        with open(state_file_name_10m, "w") as f:
+            json.dump(state, f)
 
 
 def clean_lines(lines):
