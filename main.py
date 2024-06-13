@@ -97,7 +97,7 @@ for path in path_list:
     for host in get_host_list(host_list_filename):
         # process_request(host, path, path_list)
         futures.append(
-                request_thread_pool.submit(process_request, host, path))
+                request_thread_pool.submit(process_request, host, path, path_list))
 
 concurrent.futures.wait(futures)
 
