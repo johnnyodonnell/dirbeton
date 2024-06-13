@@ -1,9 +1,12 @@
 import json
+import sys
 
 
 def main():
+    results_filename = sys.argv[1]
+
     results = {}
-    with open("results.json") as f:
+    with open(results_filename) as f:
         results = json.load(f)
 
     printable_results = []
