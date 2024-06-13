@@ -9,21 +9,13 @@ from urllib.parse import urlparse
 
 
 
-if (len(sys.argv) < 3):
-    print("dirbeton <host_list> <path_list>")
-    exit()
-
-host_list_filename = sys.argv[1]
-path_list_filename = sys.argv[2]
-
-
-request_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=100)
-state_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-
 state = {}
 state_file_name = "results.json"
 state_file_name_10m = "results_10m.json"
 last_minute = -1
+
+request_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=100)
+state_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
 def save_state():
     with open(state_file_name, "w") as f:
@@ -31,6 +23,8 @@ def save_state():
 
     # Every 10 minutes, save to similarly named file
     now = datetime.datetime.now()
+    # Needed as explained here: https://stackoverflow.com/a/11905051
+    global last_minute
     if ((now.minute % 10) == 0) and (now.minute != last_minute):
         last_minute = now.minute
         with open(state_file_name_10m, "w") as f:
@@ -108,14 +102,23 @@ def process_request(host, path, path_list, depth = 0):
                                 depth + 1))
                 concurrent.futures.wait(futures)
 
+def main():
+    if (len(sys.argv) < 3):
+        print("dirbeton <host_list> <path_list>")
+        exit()
 
-futures = []
-path_list = get_path_list(path_list_filename)
-for path in path_list:
-    for host in get_host_list(host_list_filename):
-        # process_request(host, path, path_list)
-        futures.append(
-                request_thread_pool.submit(process_request, host, path, path_list))
+    host_list_filename = sys.argv[1]
+    path_list_filename = sys.argv[2]
 
-concurrent.futures.wait(futures)
+    futures = []
+    path_list = get_path_list(path_list_filename)
+    for path in path_list:
+        for host in get_host_list(host_list_filename):
+            # process_request(host, path, path_list)
+            futures.append(
+                    request_thread_pool.submit(process_request, host, path, path_list))
+
+    concurrent.futures.wait(futures)
+
+main()
 
