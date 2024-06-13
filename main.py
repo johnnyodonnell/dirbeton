@@ -8,14 +8,19 @@ from urllib.parse import urlparse
 
 
 
+if (len(sys.argv) < 3):
+    print("dirbeton <host_list> <path_list>")
+    exit()
+
 host_list_filename = sys.argv[1]
 path_list_filename = sys.argv[2]
+
 
 request_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=100)
 state_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
 state = {}
-state_file_name = "current_state.json"
+state_file_name = "results.json"
 
 def save_state():
     with open (state_file_name, "w") as f:
@@ -58,31 +63,39 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 opener = urllib.request.build_opener(NoRedirect)
 
-def process_request(host, path):
+def process_request(host, path, path_list, depth = 0):
     parsed_host = urlparse(host)
     url = parsed_host.scheme + "://" + parsed_host.hostname
     if parsed_host.port:
         url += ":" + str(parsed_host.port)
     url += "/" + path
 
-    status_code = 0
+    response = None
     try:
         response = opener.open(url, timeout = 10)
-        status_code = response.status
     except urllib.error.HTTPError as e:
-        status_code = e.status
+        response = e
     except Exception as e:
         print(type(e).__name__)
         print(e)
 
-    if status_code > 0:
+    if not response is None:
+        status_code = response.status
         state_thread_pool.submit(add_entry, host, path, status_code)
+
+        if (status_code >= 300) and (status_code < 400) and (depth < 5):
+            location = response.getheader("Location")
+            if location == ("/" + path + "/"):
+                for next_level in path_list:
+                    new_path = path + "/" + next_level
+                    process_request(host, new_path, path_list, depth + 1)
 
 
 futures = []
-for path in get_path_list(path_list_filename):
+path_list = get_path_list(path_list_filename)
+for path in path_list:
     for host in get_host_list(host_list_filename):
-        # process_request(host, path)
+        # process_request(host, path, path_list)
         futures.append(
                 request_thread_pool.submit(process_request, host, path))
 

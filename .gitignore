@@ -1,4 +1,5 @@
 current_state.json
-hosts.txt
-directories.txt
+results.json
+hosts*.txt
+paths.txt
 
