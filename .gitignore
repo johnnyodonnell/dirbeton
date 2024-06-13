@@ -1,5 +1,3 @@
-current_state.json
-results.json
-hosts*.txt
-paths.txt
+*.json
+*.txt
 
