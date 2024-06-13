@@ -86,9 +86,17 @@ def process_request(host, path, path_list, depth = 0):
         if (status_code >= 300) and (status_code < 400) and (depth < 5):
             location = response.getheader("Location")
             if location == ("/" + path + "/"):
+                futures = []
                 for next_level in path_list:
                     new_path = path + "/" + next_level
-                    process_request(host, new_path, path_list, depth + 1)
+                    futures.append(
+                            request_thread_pool.submit(
+                                process_request,
+                                host,
+                                new_path,
+                                path_list,
+                                depth + 1))
+                concurrent.futures.wait(futures)
 
 
 futures = []
