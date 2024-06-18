@@ -12,7 +12,8 @@ def parse_and_add(raw_arg, port_set):
 
 def main():
     if (len(sys.argv) < 2):
-        print("fetch-web-endpoints <additional http ports> <additional https ports>")
+        print("fetch-web-endpoints <state file> <additional http ports> <additional https ports>")
+        exit()
 
     state_filename = sys.argv[1]
 
