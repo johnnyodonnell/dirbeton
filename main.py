@@ -41,7 +41,7 @@ def get_host_list(filename):
     with open(filename) as host_file:
         lines = host_file.readlines()
         lines = clean_lines(lines)
-        lines.insert("") # Always include base path
+        lines.insert(0, "") # Always include base path
         return lines
 
 def get_path_list(filename):
