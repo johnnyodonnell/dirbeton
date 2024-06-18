@@ -16,7 +16,7 @@ def main():
         host_map = None
         for status_code_str in host_results:
             status_code = int(status_code_str)
-            if (status_code >= 200) and (status_code < 400):
+            if (status_code >= 200) and (status_code < 300):
                 if host_map is None:
                     host_map = {"host": host, "results": []}
 

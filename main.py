@@ -23,7 +23,7 @@ def save_state():
 
     # Every 10 minutes, save to similarly named file
     now = datetime.datetime.now()
-    # Needed as explained here: https://stackoverflow.com/a/11905051
+    # `global` needed as explained here: https://stackoverflow.com/a/11905051
     global last_minute
     if ((now.minute % 10) == 0) and (now.minute != last_minute):
         last_minute = now.minute
@@ -41,6 +41,7 @@ def get_host_list(filename):
     with open(filename) as host_file:
         lines = host_file.readlines()
         lines = clean_lines(lines)
+        lines.insert("") # Always include base path
         return lines
 
 def get_path_list(filename):
