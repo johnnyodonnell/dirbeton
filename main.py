@@ -2,6 +2,7 @@ import concurrent.futures
 import json
 import datetime
 import os
+import ssl
 import sys
 import urllib.request
 
@@ -75,9 +76,15 @@ def process_request(host, path, path_list, depth = 0):
         url += ":" + str(parsed_host.port)
     url += "/" + path
 
+    # Ignore SSL verification
+    # From https://stackoverflow.com/a/58337431
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
     response = None
     try:
-        response = opener.open(url, timeout = 10)
+        response = opener.open(url, timeout = 10, context = ctx)
     except urllib.error.HTTPError as e:
         response = e
     except Exception as e:
