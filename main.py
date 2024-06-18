@@ -67,7 +67,15 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None
 
-opener = urllib.request.build_opener(NoRedirect)
+# Ignore SSL verification
+# From https://stackoverflow.com/a/58337431
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
+opener = urllib.request.build_opener(
+        NoRedirect,
+        urllib.request.HTTPSHandler(context = ctx, check_hostname = False))
 
 def process_request(host, path, path_list, depth = 0):
     parsed_host = urlparse(host)
@@ -76,15 +84,9 @@ def process_request(host, path, path_list, depth = 0):
         url += ":" + str(parsed_host.port)
     url += "/" + path
 
-    # Ignore SSL verification
-    # From https://stackoverflow.com/a/58337431
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-
     response = None
     try:
-        response = opener.open(url, timeout = 10, context = ctx)
+        response = opener.open(url, timeout = 10)
     except urllib.error.HTTPError as e:
         response = e
     except Exception as e:
