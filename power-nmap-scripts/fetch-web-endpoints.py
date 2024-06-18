@@ -11,15 +11,18 @@ def parse_and_add(raw_arg, port_set):
         port_set.add(int(addl_port))
 
 def main():
-    print("fetch-web-endpoints <additional http ports> <additional https ports>")
+    if (len(sys.argv) < 2):
+        print("fetch-web-endpoints <additional http ports> <additional https ports>")
 
-    if (len(sys.argv) > 1):
-        parse_and_add(sys.argv[1], http_ports)
+    state_filename = sys.argv[1]
+
     if (len(sys.argv) > 2):
-        parse_and_add(sys.argv[2], https_ports)
+        parse_and_add(sys.argv[2], http_ports)
+    if (len(sys.argv) > 3):
+        parse_and_add(sys.argv[3], https_ports)
 
     current_state = {}
-    with open("current_state.json") as f:
+    with open(state_filename) as f:
         current_state = json.load(f)
 
     hosts = current_state["hosts"]
